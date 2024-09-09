@@ -1,0 +1,38 @@
+---
+# "Binance", "Bybit", "Hyperliquid", ...
+exchanges:
+  #Binance:
+    #symbol: WLDUSDT
+    #type: data
+  Hyperliquid:
+    symbol: LDO
+    type: trading
+
+# "plain", "stink" ,...
+quote_generator: sandbox
+
+# The params "total_orders" and "max_position" must be present in any
+# new strategies created! Max position is auto converted to quote
+# units so always keep this value in $ (USD).
+parameters:
+  plain:
+    total_orders: 10            # Consider your rate limits!
+    max_position: 100           # Value in $ (USD)
+    minimum_spread: 10          # Value in BPS (Basis Points)
+    aggressiveness: 0.75        # Must be 0.0 <-> 1.0
+
+  stink:
+    total_orders: 10            # Consider your rate limits!
+    max_position: 100           # Value in $ (USD)
+    minimum_spread: 50          # Value in BPS (Basis Points)
+    maximum_spread: 250         # Value in BPS (Basis Points)
+  
+  sandbox:
+    total_orders: 4             # Consider your rate limits!
+    max_position: 100          # Value in $ (USD)
+    minimum_spread: 30           # Value in BPS (Basis Points)
+    maximum_spread: 250         # Value in BPS (Basis Points)
+    take_profit: 20              #Value to place take profit from avg entry (Basis Points)
+    generation_interval: 1000   #Interval to generate new quotes in ms
+    liquidation_timer: 20000    #Max time interval before purging position with market order (ms)
+...
