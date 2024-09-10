@@ -234,7 +234,7 @@ class SharedState(ABC):
         
         current_folder = os.path.dirname(os.path.abspath(__file__))
         while current_folder.split('\\')[-1] != "src":
-            current_folder = current_folder = os.path.dirname(current_folder)
+            current_folder  = os.path.dirname(current_folder)
         
         config_path = os.path.join(current_folder, 'exchanges', 'config.json')
         
