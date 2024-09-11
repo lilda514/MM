@@ -111,7 +111,7 @@ class SharedState(ABC):
             from src.exchanges.binance.websocket import BinanceWebsocket
             
             # NOTE: Binance requires capital symbols
-            self.exchanges["binance"]["symbol"] = symbol.upper()
+            self.exchanges["binance"]["symbol"] = symbol
             
             if self.exchanges["binance"]["type"].lower() == "trading" :
                 if (not self.config["binance"].get("api_key",False) or not self.config["binance"].get("api_secret",False)) :
@@ -142,7 +142,7 @@ class SharedState(ABC):
             from frameworks.exchange.bybit.websocket import BybitWebsocket
 
             # NOTE: Bybit requires capital symbols
-            self.exchanges["bybit"]["symbol"] = symbol.upper()
+            self.exchanges["bybit"]["symbol"] = symbol
             
             if self.exchanges["bybit"]["type"].lower() == "trading" :
                 if (not self.config["bybit"].get("api_key",False) or not self.config["bybit"].get("api_secret",False)) :
@@ -174,7 +174,7 @@ class SharedState(ABC):
                 from src.exchanges.hyperliquid.ws import HlWebsocket
                 
                 # NOTE: Hl requires capital symbols
-                self.exchanges["hyperliquid"]["symbol"] = symbol.upper()
+                self.exchanges["hyperliquid"]["symbol"] = symbol
                 
                 if self.exchanges["hyperliquid"]["type"].lower() == "trading" :
                     if (not self.config["hyperliquid"].get("secret_key",False)):
