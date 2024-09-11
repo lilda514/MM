@@ -236,7 +236,7 @@ class SharedState(ABC):
         while current_folder.split('\\')[-1] != "src":
             current_folder  = os.path.dirname(current_folder)
         
-        config_path = os.path.join(current_folder, 'exchanges', 'config.json')
+        config_path = os.path.join(current_folder, 'exchanges', 'config.json.enc')
         
         
         password = getpass("Enter password to decrypt the file: ")
