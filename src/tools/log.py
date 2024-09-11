@@ -68,7 +68,7 @@ class LoggerInstance:
             date = datetime.datetime.today()
             datestring = date.strftime("%Y-%m-%d %Hh%M")
             cwd = os.getcwd()
-            self.basepath = os.path.join(cwd, f'logs\\{datestring}')
+            self.basepath = os.path.join(cwd,"logs",f"{datestring}")
             os.makedirs(self.basepath, exist_ok=True)  # Ensure the directory exists
         else:
             self.basepath = basepath
