@@ -12,7 +12,7 @@ class MMSharedState(SharedState):
     
     def set_parameters_path(self):
         current_folder = os.path.dirname(os.path.abspath(__file__))
-        while current_folder.split('\\')[-1] != "src":
+        while current_folder.split(os.sep)[-1] != "src":
             current_folder = os.path.dirname(current_folder)
         
         return os.path.join(current_folder, 'marketmaking', 'parameters.yaml')
