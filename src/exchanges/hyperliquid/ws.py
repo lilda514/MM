@@ -25,6 +25,7 @@ class HlWebsocket(WebsocketStream):
     def __init__(self, exch: Hyperliquid) -> None:
         super().__init__()
         self.exch = exch
+        self.is_mainnet = exch.is_mainnet
         self.endpoints = HyperliquidEndpoints
 
     def create_handlers(self) -> None:
@@ -79,7 +80,7 @@ class HlWebsocket(WebsocketStream):
 
         request = [{"method": "subscribe", "subscription": sub} for sub in subs]
 
-        return (self.endpoints["test_ws"], request)
+        return (self.endpoints["pub_ws"] if self.is_mainnet else self.endpoints["test_ws"], request)
 
     async def public_stream_handler(self, recv: Dict) -> None:
         try:

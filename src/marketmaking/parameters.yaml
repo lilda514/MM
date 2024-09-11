@@ -5,7 +5,7 @@ exchanges:
     #symbol: WLDUSDT
     #type: data
   Hyperliquid:
-    symbol: LDO
+    symbol: kPEPE
     type: trading
 
 # "plain", "stink" ,...

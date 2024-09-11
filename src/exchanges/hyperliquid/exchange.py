@@ -26,6 +26,7 @@ class Hyperliquid(aExchange,aInfo):
         self.pos_dir_converter = HlPositionDirectionConverter()
         self.endpoints = HyperliquidEndpoints
         self.orderid = HlOrderIdGenerator()
+        self.is_mainnet = is_mainnet
         
         super().__init__(
             wallet = eth_account.Account.from_key(str(secret_key)),
