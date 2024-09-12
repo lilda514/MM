@@ -5,7 +5,7 @@ exchanges:
     #symbol: WLDUSDT
     #type: data
   Hyperliquid:
-    symbol: kPEPE
+    symbol: WIF
     type: trading
 
 # "plain", "stink" ,...
@@ -28,11 +28,11 @@ parameters:
     maximum_spread: 250         # Value in BPS (Basis Points)
   
   sandbox:
-    total_orders: 4             # Consider your rate limits!
-    max_position: 100           # Value in $ (USD)
+    total_orders: 2             # Consider your rate limits!
+    max_position: 50            # Value in $ (USD)
     minimum_spread: 15          # Value in BPS (Basis Points)
     maximum_spread: 250         # Value in BPS (Basis Points)
     take_profit: 10             #Value to place take profit from avg entry (Basis Points)
     generation_interval: 3000   #Interval to generate new quotes in ms
-    liquidation_timer: 20000    #Max time interval before purging position with market order (ms)
+    liquidation_timer: 30000    #Max time interval before purging position with market order (ms)
 ...
