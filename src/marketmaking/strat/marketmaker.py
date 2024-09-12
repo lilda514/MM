@@ -113,7 +113,7 @@ class TradingLogic:
 
                 # self.logging.debug(topic="MM", msg=f"FP Skew: {fp_skew} - Vol: {vol} - NewOrders: {new_orders}")
                 self.logging.debug(f"NewOrders: {new_orders}")
-                await asyncio.sleep(3)
+                await asyncio.sleep(self.quote_generator.params["generation_interval"]/1000)#interval in ms
 
         except Exception as e:
             self.logging.error(f"Main loop: {e}")

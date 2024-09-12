@@ -160,7 +160,7 @@ class OrderManagementSystem:
 
         return None
 
-    def is_out_of_bounds(self, old_order: Order, new_order: Order, sensitivity: float=0.1) -> bool:
+    def is_out_of_bounds(self, old_order: Order, new_order: Order, sensitivity: float=0.15) -> bool:
         """
         Check if the old order's price is out of bounds compared to the new order's price.
 

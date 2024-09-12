@@ -9,7 +9,7 @@ import traceback
 
 async def main():
     try:
-        debug = True
+        debug = False
         rootLogger = LoggerInstance("MM",debug)
         rootLogger.setFilters("MM")
         rootLogger.setHandlers()
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-    nest_asyncio.apply(loop)
+   # nest_asyncio.apply(loop)
     try:
         loop.run_until_complete(main())
     finally:
