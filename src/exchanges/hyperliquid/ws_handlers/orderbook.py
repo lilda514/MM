@@ -9,7 +9,7 @@ import numpy as np
 from typing import Dict, List, Union
 from src.exchanges.common.localorderbook import BaseOrderbook
 from abc import ABC, abstractmethod
-from hyperliquid.utils.types import L2BookMsg
+from src.exchanges.hyperliquid.sdk.utils.types import L2BookMsg
 
 class HlOrderBookHandler():
     
