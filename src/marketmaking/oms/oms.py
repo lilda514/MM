@@ -323,7 +323,7 @@ class OrderManagementSystem:
                         to_create.append(order)             
                         self.logging.debug(f"Sending order: {order}")
             
-            self.logging.debug(f"sending following orders: {to_create}")
+            self.logging.info(f"sending following orders: {to_create}")
             if to_create: 
                 order_create_task =  [asyncio.create_task(self.create_orders(to_create))]
                 tasks = cancel_tasks + order_create_task
@@ -421,23 +421,31 @@ class OrderManagementSystem:
         
         #We might want to do different things depending on where the problematic order was. For
         #now we simply delete it from there
+        
         if order_identification in self.data["orders"]["to_create"]:
+            self.logging.info(f"error with order {self.data['orders']['to_create'][order_identification]}: {result}")
             del self.data["orders"]["to_create"][order_identification]
             
         elif order_identification in self.data["orders"]["to_amend"]:
+            self.logging.info(f"error with order {self.data['orders']['to_amend'][order_identification]}: {result}")
             del self.data["orders"]["to_amend"][order_identification]
             
         elif order_identification in self.data["orders"]["to_cancel"]:
+            self.logging.info(f"error with order {self.data['orders']['to_cancel'][order_identification]}: {result}")
             del self.data["orders"]["to_cancel"][order_identification]
         
         if order_identification in self.data["orders"]["tp"]:
+            self.logging.info(f"error with order {self.data['orders']['tp'][order_identification]}: {result}")
             del self.data["orders"]["tp"][order_identification]
             
         elif order_identification in self.data["orders"]["sl"]:
+            self.logging.info(f"error with order {self.data['orders']['sl'][order_identification]}: {result}")
             del self.data["orders"]["sl"][order_identification]
         
         if order_identification in self.data["orders"]["in_flight"]:
+            self.logging.info(f"error with order {self.data['orders']['in_flight'][order_identification]}: {result}")
             del self.data["orders"]["in_flight"][order_identification]
+            
             
         elif order_identification in self.data["orders"]["in_the_book"]:
             #Do nothing since the exchange knows about this order and will most likely send out orderupdates or userfills about it
