@@ -1,6 +1,6 @@
-from hyperliquid.api import API
-from hyperliquid.utils.types import Any, Callable, Meta, SpotMeta,SpotMetaAndAssetCtxs, Optional, Subscription, cast, Cloid
-from hyperliquid.websocket_manager import WebsocketManager
+from src.exchanges.hyperliquid.sdk.api import API
+from src.exchanges.hyperliquid.sdk.utils.types import Any, Callable, Meta, SpotMeta,SpotMetaAndAssetCtxs, Optional, Subscription, cast, Cloid
+from src.exchanges.hyperliquid.sdk.websocket_manager import WebsocketManager
 import threading
 
 
