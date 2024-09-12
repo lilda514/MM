@@ -5,7 +5,7 @@ from eth_account.messages import encode_structured_data
 from eth_utils import keccak, to_hex
 import msgpack
 
-from hyperliquid.utils.types import Literal, Optional, TypedDict, Union, Cloid, NotRequired
+from src.exchanges.hyperliquid.sdk.utils.types import Literal, Optional, TypedDict, Union, Cloid, NotRequired
 
 Tif = Union[Literal["Alo"], Literal["Ioc"], Literal["Gtc"]]
 Tpsl = Union[Literal["tp"], Literal["sl"]]
