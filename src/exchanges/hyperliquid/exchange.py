@@ -1,6 +1,6 @@
-from hyperliquid.aexchange import aExchange
-from hyperliquid.ainfo import aInfo
-from hyperliquid.utils.signing import OrderRequest
+from src.exchanges.hyperliquid.sdk.aexchange import aExchange
+from src.exchanges.hyperliquid.sdk.ainfo import aInfo
+from src.exchanges.hyperliquid.sdk.utils.signing import OrderRequest
 
 from src.exchanges.common.types import Side, OrderType, TimeInForce, Order
 from src.exchanges.hyperliquid.endpoints import HyperliquidEndpoints
