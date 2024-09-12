@@ -164,7 +164,7 @@ class SandBoxQuoteGenerator(QuoteGenerator):
                         is_inactive_previous_tp = (len(self.generated_tp) - len(active_previous_tp)) > 0
                         
                         if len(active_previous_tp) > 1: 
-                            self.logging.debug("More TP's than allowed in the book, keeping the newest and canceling the rest")
+                            self.logging.info("More TP's than allowed in the book, keeping the newest and canceling the rest")
                             newest_timestamp = 0
                             for idx,order in enumerate(active_previous_tp):
                                 if order.timestamp > newest_timestamp:
@@ -180,7 +180,7 @@ class SandBoxQuoteGenerator(QuoteGenerator):
                         elif len(active_previous_tp) > 0 and not is_inactive_previous_tp:
                             active_previous_tp = active_previous_tp[0]
                         else:
-                            self.logging.debug("A previous tp has been generated but not yet acknowledge by the exchange")
+                            self.logging.info("A previous tp has been generated but not yet acknowledge by the exchange")
                             #TODO: IMPLEMENT LOGIC TO VERIFY IF SOMETHING IS IN FLIGHT. IF IT IS FOR LESS THAN 10 SEC DONT GENERATE NEW TP BUT IF 
                             #MORE, CONSIDER IT LOST/DROPPED AND GENERATE NEW ONE
                             self.data["flags"]["position"].clear()
@@ -204,7 +204,7 @@ class SandBoxQuoteGenerator(QuoteGenerator):
                         orders.clear()
                     
                     if time_ms() - self.position.openTime >= self.params["liquidation_timer"]:
-                        self.logging.debug("Position executor has reached liquidation timer,generating market order")
+                        self.logging.info("Position executor has reached liquidation timer,generating market order")
                         #If we market close remove the tp's we just created that have not been sent from "orders" list
                         orders.clear()
                         
@@ -230,17 +230,17 @@ class SandBoxQuoteGenerator(QuoteGenerator):
                     if is_previous_tp : #If we already had a tp in the book we amend it otherwise we create a new one
                         if len(self.generated_tp) <= 2:
                             self.generated_tp.update({orders[0].clientOrderId.to_raw() : orders[0] })
-                            self.logging.debug(f"Position executor will AMEND with orders : {orders}")
+                            self.logging.info(f"Position executor will AMEND with orders : {orders}")
                             self.data["orders"]["to_amend"].update({order.clientOrderId.to_raw() : order for order in orders})
                             self.data["flags"]["to_amend"].set()
                         else:
-                            self.logging.debug("Position executor still waiting on a previous order")
-                            self.logging.debug(f"Cannot send order: {orders}")
+                            self.logging.info("Position executor still waiting on a previous order")
+                            self.logging.info(f"Cannot send order: {orders}")
 
 
                     else:
                         self.generated_tp.update({orders[0].clientOrderId.to_raw() : orders[0] })
-                        self.logging.debug(f"Position executor will CREATE orders : {orders}")
+                        self.logging.info(f"Position executor will CREATE orders : {orders}")
                         self.data["orders"]["to_create"].update({order.clientOrderId.to_raw() : order for order in orders})
                         self.data["flags"]["to_create"].set()
                         
