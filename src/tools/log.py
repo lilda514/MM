@@ -94,11 +94,11 @@ class LoggerInstance:
         commonFileHandler.setFormatter(self.defaultFormatter())
         self.logger.addHandler(commonFileHandler)
         
-        if self.logger.level == logging.DEBUG:
-            consoleHandler = logging.StreamHandler()
-            consoleHandler.setLevel(self.logger.level)
-            consoleHandler.setFormatter(self.defaultFormatter())
-            self.logger.addHandler(consoleHandler)
+        # if self.logger.level == logging.DEBUG:
+        consoleHandler = logging.StreamHandler()
+        consoleHandler.setLevel(self.logger.level)
+        consoleHandler.setFormatter(self.defaultFormatter())
+        self.logger.addHandler(consoleHandler)
         
     def info(self, msg):
         self.logger.info(msg)

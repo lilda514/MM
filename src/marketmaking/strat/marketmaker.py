@@ -97,9 +97,9 @@ class TradingLogic:
                          ]
                 
                 asyncio.create_task(self.oms[trading_exch].monitor(flags))
-                self.logging.debug(f"monitor task started for {trading_exch}")
+                self.logging.info(f"monitor task started for {trading_exch}")
                 asyncio.create_task(self.quote_generator.position_executor())
-                self.logging.debug(f"position executor task started for {trading_exch}")
+                self.logging.info(f"position executor task started for {trading_exch}")
                 await asyncio.sleep(0)
                 
             while True:
