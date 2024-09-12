@@ -1,0 +1,41 @@
+18:22:22.482 | INFO | LOGIC | Warming up data feeds...
+18:22:22.494 | INFO | HYPERLIQUID.WS | Attempting to start public ws stream...
+18:22:22.583 | INFO | hyperliquid.EXCH | Hyperliquid warmup sequence complete.
+18:22:22.588 | INFO | HYPERLIQUID.WS | Subscription successful to: trades
+18:22:22.588 | INFO | HYPERLIQUID.WS | Subscription successful to: l2Book
+18:22:26.617 | INFO | HYPERLIQUID.WS | Subscription successful to: candle
+18:22:26.618 | INFO | HYPERLIQUID.WS | Subscription successful to: webData2
+18:22:26.624 | INFO | HYPERLIQUID.WS | Subscription successful to: activeAssetCtx
+18:22:26.624 | INFO | HYPERLIQUID.WS | Subscription successful to: userFills
+18:22:26.625 | INFO | HYPERLIQUID.WS | Subscription successful to: orderUpdates
+18:22:27.623 | INFO | LOGIC | Feeds successfully warmed up.
+18:22:27.623 | INFO | LOGIC | Attempting to load quote generator: sandbox
+18:22:27.624 | INFO | LOGIC | Starting 'sandbox' strategy on kPEPE...
+18:22:27.625 | INFO | LOGIC | monitor task started for hyperliquid
+18:22:27.625 | INFO | LOGIC | position executor task started for hyperliquid
+18:22:28.396 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007372, size=5809.0, orderId=None, clientOrderId=0x00000000000000000000000000989681 (10000001)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007383, size=5809.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff67697f (-10000001)), Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007356, size=7746.0, orderId=None, clientOrderId=0x00000000000000000000000001312d01 (20000001)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007399, size=7746.0, orderId=None, clientOrderId=0xfffffffffffffffffffffffffeced2ff (-20000001))]
+18:22:31.648 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:22:34.650 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:22:37.651 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:22:40.653 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007373, size=5808.0, orderId=None, clientOrderId=0x00000000000000000000000000989685 (10000005)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007384, size=5808.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff67697b (-10000005))]
+18:22:43.794 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:22:46.796 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007374, size=5808.0, orderId=None, clientOrderId=0x00000000000000000000000000989687 (10000007)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007385, size=5808.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff676979 (-10000007))]
+18:22:50.031 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:22:53.033 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007375, size=5807.0, orderId=None, clientOrderId=0x00000000000000000000000000989689 (10000009)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007386, size=5807.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff676977 (-10000009)), Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007359, size=7742.0, orderId=None, clientOrderId=0x00000000000000000000000001312d09 (20000009)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007402, size=7742.0, orderId=None, clientOrderId=0xfffffffffffffffffffffffffeced2f7 (-20000009))]
+18:22:56.290 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007376, size=5806.0, orderId=None, clientOrderId=0x0000000000000000000000000098968a (10000010)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007387, size=5806.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff676976 (-10000010))]
+18:22:59.549 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:02.551 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:05.552 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:08.555 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:11.556 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:14.558 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:17.560 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:20.562 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007374, size=5808.0, orderId=None, clientOrderId=0x00000000000000000000000000989692 (10000018)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007385, size=5808.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff67696e (-10000018))]
+18:23:23.711 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007372, size=5809.0, orderId=None, clientOrderId=0x00000000000000000000000000989693 (10000019)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007383, size=5809.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff67696d (-10000019)), Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007356, size=7746.0, orderId=None, clientOrderId=0x00000000000000000000000001312d13 (20000019)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007399, size=7746.0, orderId=None, clientOrderId=0xfffffffffffffffffffffffffeced2ed (-20000019))]
+18:23:26.913 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:29.916 | INFO | HYPERLIQUID.OMS | sending following orders: [Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.007376, size=5806.0, orderId=None, clientOrderId=0x00000000000000000000000000989695 (10000021)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007387, size=5806.0, orderId=None, clientOrderId=0xffffffffffffffffffffffffff67696b (-10000021)), Order(symbol=kPEPE, side=1, orderType=0, timeInForce=2, price=0.00736, size=7741.0, orderId=None, clientOrderId=0x00000000000000000000000001312d15 (20000021)), Order(symbol=kPEPE, side=-1, orderType=0, timeInForce=2, price=0.007403, size=7741.0, orderId=None, clientOrderId=0xfffffffffffffffffffffffffeced2eb (-20000021))]
+18:23:33.183 | INFO | HYPERLIQUID.OMS | sending following orders: []
+18:23:35.339 | CRITICAL | MM | Process manually interupted by user...
+18:23:35.340 | CRITICAL | MM | Starting shutdown sequence...
+18:23:35.478 | INFO | hyperliquid.EXCH | Shutdown sequence complete.
+18:23:35.478 | INFO | MM | Goodnight...
