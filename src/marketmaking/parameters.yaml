@@ -33,6 +33,6 @@ parameters:
     minimum_spread: 15          # Value in BPS (Basis Points)
     maximum_spread: 250         # Value in BPS (Basis Points)
     take_profit: 10             #Value to place take profit from avg entry (Basis Points)
-    generation_interval: 3000   #Interval to generate new quotes in ms
+    generation_interval: 1000   #Interval to generate new quotes in ms
     liquidation_timer: 30000    #Max time interval before purging position with market order (ms)
 ...
