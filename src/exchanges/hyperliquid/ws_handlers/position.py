@@ -112,10 +112,11 @@ class HlPositionHandler():
         2. Update the self.position attributes using self.position.update()
         """
         try:
-            self.logging.debug(f"Position BEFORE process: {self.position}")
+            # self.logging.debug(f"Position BEFORE process: {self.position}")
 
             if recv["channel"] == "userFills":
-                self.logging.debug("Received userFills")
+                self.logging.info(f"Position BEFORE process: {self.position}")
+                self.logging.info("Received userFills")
                 if recv["data"]["user"] != self.addr:
                     self.logging.debug("wrong user")
                     return
@@ -152,6 +153,8 @@ class HlPositionHandler():
                                       }
                         
                         self.position.update(**posProcess)
+                self.logging.debug(f"Position AFTER process: {self.position}")
+
                 
             elif recv["channel"] == "webData2":
                 self.logging.debug("Received webData2")
@@ -179,7 +182,7 @@ class HlPositionHandler():
                     # if abs(self.position.size - 0.0) > self.EPSILON:
                         self.position.reset()
 
-            self.logging.debug(f"Position AFTER process: {self.position}")
+            # self.logging.debug(f"Position AFTER process: {self.position}")
             
             if abs(self.position.size - 0.0) > self.EPSILON:
                 self.flag.set()

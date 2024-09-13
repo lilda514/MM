@@ -323,10 +323,10 @@ class OrderManagementSystem:
                         to_create.append(order)             
                         self.logging.debug(f"Sending order: {order}")
             
-            self.logging.info(f"sending following orders: {to_create}")
             if to_create: 
                 order_create_task =  [asyncio.create_task(self.create_orders(to_create))]
                 tasks = cancel_tasks + order_create_task
+                self.logging.info(f"sending following orders: {to_create}")
             else:
                 tasks = cancel_tasks
                 
