@@ -1,7 +1,7 @@
 import orjson
 import hashlib
 import hmac
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 
 from src.exchanges.common.client import Client
 
@@ -66,4 +66,6 @@ class BinanceClient(Client):
             error_code,
             (False, f"Unknown error code: {error_code}")
         )
+    def sign(self, method: str, header: Dict) -> Dict[str, Any]:
+        pass
         

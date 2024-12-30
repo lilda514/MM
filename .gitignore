@@ -1,3 +1,6 @@
 **/__pycache__/
 config.json
-MM/
+#MM/
+s3_downloader.py
+untitled1.py
+src/exchanges/hyperliquid/oldlog/

@@ -22,7 +22,8 @@ class BinanceTimeInForceConverter(TimeInForceConverter):
         super().__init__(
             GTC="GTC", 
             FOK="FOK", 
-            POST_ONLY="GTX"
+            POST_ONLY="GTX",
+            IOC = "IOC"
         )
 
 class BinancePositionDirectionConverter(PositionDirectionConverter):

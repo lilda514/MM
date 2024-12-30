@@ -5,6 +5,11 @@ from abc import ABC, abstractmethod
 from typing import Tuple, List, Dict, Callable, Optional
 
 from src.tools.log import LoggerInstance
+import time
+import msgpack
+import zstandard as zstd
+import boto3
+from datetime import datetime
 
 
 class WebsocketStream(ABC):
@@ -12,7 +17,7 @@ class WebsocketStream(ABC):
     _failure_ = set((aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR))
     _conns_ = 1  # NOTE: Handlers don't support duplicate detection yet!
 
-    def __init__(self) -> None:
+    def __init__(self, ws_record = False) -> None:
         """
         Initializes the WebsocketStream class with public and private aiohttp sessions.
 
@@ -27,6 +32,15 @@ class WebsocketStream(ABC):
         self.public = aiohttp.ClientSession()
         self.private = aiohttp.ClientSession()
         
+        self.ws_record = ws_record
+        #Allows to record received websocket messages and save them to s3 bucket. For debugging purposes
+        if self.ws_record:    
+            self.message_queue = asyncio.Queue()
+            self.compressor = zstd.ZstdCompressor(level=3)
+            self.s3_client = boto3.client('s3')
+            self.BATCH_SIZE = 10000  # Number of messages per batch to save
+            self.SAVE_INTERVAL = 3600  # Save to S3 every 1 hour (in seconds) 
+
     def _disable_trading_methods(self):
         """Disable trading methods if trading access is not allowed."""
         methods_to_disable = [
@@ -62,7 +76,7 @@ class WebsocketStream(ABC):
         self.logging = logging
         logger_name = self.logging.name
         separated_names = logger_name.split(".")
-        self.logging.setFilters(separated_names[-2].upper() + "." + "WS") #Topic is "{Exchange_name}.ws"
+        self.logging.setFilters(separated_names[-2].upper() + "." + "WS") #Topic is "{Exchange_name}.WS"
         self.logging.setHandlers()
         self.symbol = symbol
         self.data = data
@@ -181,7 +195,28 @@ class WebsocketStream(ABC):
             If the received message does not contain expected keys or handler mappings.
         """
         pass
+    
+    # @abstractmethod
+    # async def custom_ping(self,
+    #                       ws: aiohttp.ClientWebSocketResponse, 
+    #                       stream_str: str, 
+    #                       payload: Dict = None,
+    #                       timer:float = None
+    #                       ):
+    #     """
+    #     Sends a ping message at a fixed interval
 
+    #     Parameters
+    #     ----------
+    #     payload : Dict
+    #         The the ping payload.
+
+    #     Returns
+    #     -------
+    #     None.
+
+    #     """
+    #     pass
     async def send(
         self, ws: aiohttp.ClientWebSocketResponse, stream_str: str, payload: Dict
     ) -> None:
@@ -221,6 +256,8 @@ class WebsocketStream(ABC):
         handler_map: Callable,
         on_connect: List[Dict],
         private: bool,
+        custom_ping: dict = None, 
+        ping_timer: float = None 
     ) -> bool:
         """
         Manages a single WebSocket connection.
@@ -257,15 +294,27 @@ class WebsocketStream(ABC):
             self.logging.info(
                 f"Attempting to start {stream_str} ws stream..."
             )
-
-            async with session.ws_connect(url) as ws:
+            
+            if ping_timer != None and custom_ping == None: 
+                _heartbeat = ping_timer
+            else:
+                _heartbeat = None
+            
+            async with session.ws_connect(url, heartbeat = _heartbeat) as ws:
+                
+                #TODO: add logic for sending custom ping messages
+                # asyncio.create_task(self.send(ws,stream_str,custom_ping))
+                
                 for payload in on_connect:
                     await self.send(ws, stream_str, payload)
 
                 async for msg in ws:
+                    await self.message_queue.put((str(time.time_ns()) , msg.data))
+
                     if msg.type in self._success_:
                         # self.logging.debug(f"{msg.data}")
-                        await handler_map(orjson.loads(msg.data))
+                        # await handler_map(orjson.loads(msg.data))
+                        pass
 
                     elif msg.type in self._failure_:
                         self.logging.warning(
@@ -285,7 +334,7 @@ class WebsocketStream(ABC):
             return True
 
     async def _create_reconnect_task_(
-        self, url: str, handler_map: Callable, on_connect: List[Dict], private: bool
+        self, url: str, handler_map: Callable, on_connect: List[Dict], private: bool, custom_ping: Dict = None, ping_timer: float = None,
     ) -> None:
         """
         Creates a task to manage reconnections.
@@ -306,7 +355,7 @@ class WebsocketStream(ABC):
 
         """
         while True:
-            reconnect = await self._single_conn_(url, handler_map, on_connect, private)
+            reconnect = await self._single_conn_(url, handler_map, on_connect, private, custom_ping, ping_timer)
             self.logging.debug(
                 f"Attempting to reconnect ws task, status: [{reconnect}]",
             )
@@ -315,7 +364,7 @@ class WebsocketStream(ABC):
             await asyncio.sleep(1.0)
 
     async def _manage_connections_(
-        self, url: str, handler_map: Callable, on_connect: List[Dict], private: bool
+        self, url: str, handler_map: Callable, on_connect: List[Dict], private: bool, custom_ping: Dict = None, ping_timer: float = None,
     ) -> None:
         """
         Manages multiple WebSocket connections.
@@ -336,13 +385,13 @@ class WebsocketStream(ABC):
 
         """
         tasks = [
-            self._create_reconnect_task_(url, handler_map, on_connect, private)
+            self._create_reconnect_task_(url, handler_map, on_connect, private, custom_ping, ping_timer)
             for _ in range(self._conns_)
         ]
         await asyncio.gather(*tasks)
 
     async def start_public_ws(
-        self, url: str, handler_map: Callable, on_connect: Optional[List[Dict]] = None
+        self, url: str, handler_map: Callable, on_connect: Optional[List[Dict]] = None, custom_ping: Dict = None, ping_timer: float = None,
     ) -> None:
         """
         Starts the public WebSocket connection.
@@ -363,10 +412,12 @@ class WebsocketStream(ABC):
             handler_map=handler_map,
             on_connect=[] if on_connect is None else on_connect,
             private=False,
+            custom_ping=custom_ping,
+            ping_timer=ping_timer,
         )
 
     async def start_private_ws(
-        self, url: str, handler_map: Callable, on_connect: Optional[List[Dict]] = None
+        self, url: str, handler_map: Callable, on_connect: Optional[List[Dict]] = None, custom_ping: Dict = None, ping_timer: float = None,
     ) -> None:
         """
         Starts the private WebSocket connection.
@@ -387,7 +438,93 @@ class WebsocketStream(ABC):
             handler_map=handler_map,
             on_connect=[] if on_connect is None else on_connect,
             private=False,
+            custom_ping=custom_ping,
+            ping_timer=ping_timer,
         )
+        
+    async def save_to_s3(self, message_queue: asyncio.Queue, bucket_name: str, key_prefix: str = None):
+        """
+        Save messages from the queue to S3 in compressed, hourly batches.
+
+        Parameters
+        ----------
+        message_queue : asyncio.Queue
+            The queue containing messages.
+        bucket_name : str
+            S3 bucket name.
+        key_prefix : str
+            Prefix (folder path) for S3 keys.
+        """
+        if not key_prefix: 
+            key_prefix = self.logging.topic.split(".")  # name of the exchange
+        
+        current_batch = []
+        start_time = datetime.utcnow()
+        
+        try:
+            while True:
+                try:
+                    # Gather messages for batching
+                    for _ in range(self.BATCH_SIZE):
+                        current_batch.append(await asyncio.wait_for(self.message_queue.get(), timeout=1))
+    
+                except asyncio.TimeoutError:
+                    pass  # No messages to process, proceed with saving
+    
+                now = datetime.utcnow()
+                elapsed_time = (now - start_time).total_seconds()
+    
+                if len(current_batch) >= self.BATCH_SIZE or (elapsed_time >= self.SAVE_INTERVAL and current_batch): 
+                    # Serialize and compress the batch
+                    packed_data = msgpack.packb(current_batch)
+                    compressed_data = self.compressor.compress(packed_data)
+
+                    # Generate a timestamped S3 key
+                    timestamp = start_time.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+                    s3_key = f"{key_prefix}/data_{timestamp}.msgpack.zst"
+
+                    # Upload to S3
+                    try:
+                        self.s3_client.put_object(
+                            Bucket=bucket_name,
+                            Key=s3_key,
+                            Body=compressed_data,
+                        )
+                        print(f"Uploaded batch to S3: {s3_key}")
+                    except Exception as e:
+                        print(f"Failed to upload batch to S3: {e}")
+
+                    # Clear the current batch
+                    current_batch = []
+    
+                    # Update start time for the next interval
+                    start_time = now
+        except asyncio.CancelledError:
+            # Handle graceful shutdown
+            if current_batch:
+                print("Saving remaining messages before shutting down...")
+                packed_data = msgpack.packb(current_batch)
+                compressed_data = self.compressor.compress(packed_data)
+    
+                # Generate a timestamped S3 key
+                timestamp = datetime.utcnow().strftime("%Y-%m-%d_%Hh%Mm%Ss")
+                s3_key = f"{key_prefix}/data_{timestamp}.msgpack.zst"
+    
+                # Upload to S3
+                try:
+                    self.s3_client.put_object(
+                        Bucket=bucket_name,
+                        Key=s3_key,
+                        Body=compressed_data,
+                    )
+                    print(f"Uploaded remaining batch to S3: {s3_key}")
+                except Exception as e:
+                    print(f"Failed to upload remaining batch to S3: {e}")
+            print("Gracefully shutting down...")
+        finally:
+            # Close the S3 client
+            self.s3_client.close()
+
 
     @abstractmethod
     async def start(self) -> None:

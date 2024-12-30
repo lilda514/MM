@@ -16,8 +16,9 @@ class BinanceOrderbookHandler(OrderbookHandler):
             bids = np.array(recv["bids"], dtype=np.float64)
             asks = np.array(recv["asks"], dtype=np.float64)
             timestamp = float(recv["T"])
+            seq_id = int(recv.get("lastUpdateId"))
 
-            self.orderbook.refresh(asks, bids, timestamp)
+            self.orderbook.refresh(asks, bids, timestamp, seq_id)
 
         except Exception as e:
             raise Exception(f"Orderbook Refresh :: {e}")
@@ -31,11 +32,13 @@ class BinanceOrderbookHandler(OrderbookHandler):
 
                 if len(recv.get("b", [])) > 0:
                     bids = np.array(recv["b"], dtype=np.float64)
-                    self.orderbook.update_bids(bids,timestamp)
+                    self.orderbook.update_bids(bids,timestamp, new_update_id)
 
                 if len(recv.get("a", [])) > 0:
                     asks = np.array(recv["a"], dtype=np.float64)
-                    self.orderbook.update_asks(asks,timestamp)
+                    self.orderbook.update_asks(asks,timestamp,new_update_id)
+                
+
 
         except Exception as e:
             raise Exception(f"Orderbook Process :: {e}")

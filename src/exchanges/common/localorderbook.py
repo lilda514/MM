@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 from typing import Dict
-from src.tools.Numbas import nbisin, nb_float_to_str
+from src.tools.Numbas import nbisin, nb_float_to_str,numba_sort_desc,numba_sort_asc
 from numba.experimental import jitclass
 import numba.types
 import time
@@ -14,7 +14,8 @@ spec = [
         ('asks', numba.types.float64[:, :]),
         ('bba', numba.types.float64[:, :]),
         ('timestamp', numba.types.float64),
-        ('columns', numba.types.int16)
+        ('columns', numba.types.int16),
+        ('seq_id', numba.types.int32),
         ]
 
 @jitclass(spec)
@@ -58,23 +59,38 @@ class BaseOrderbook:
         self.bba = np.zeros((2, columns), dtype= np.float64)
         self.timestamp = 0.0
         self.columns = columns
+        self.seq_id = 0
         
+    # def sort_bids(self) -> None: # 1.56 µs ± 31.6 ns
+    #     """
+    #     Sorts the bid orders in descending order of price and updates the best bid.
+    #     """
+    #     self.bids = self.bids[self.bids[:, 0].argsort()][::-1][: self.depth]
+    #     self.bba[0, :] = self.bids[0]
 
-    def sort_bids(self) -> None: # 1.56 µs ± 31.6 ns
+    # def sort_asks(self) -> None: # 1.56 µs ± 31.6 ns
+    #     """
+    #     Sorts the ask orders in ascending order of price and updates the best ask.
+    #     """
+    #     self.asks = self.asks[self.asks[:, 0].argsort()][: self.depth]
+    #     self.bba[1, :] = self.asks[0]
+        
+    def sort_bids(self) -> None: #786 ns ± 30.9 ns
         """
         Sorts the bid orders in descending order of price and updates the best bid.
         """
-        self.bids = self.bids[self.bids[:, 0].argsort()][::-1][: self.depth]
-        self.bba[0, :] = self.bids[0]
-
-    def sort_asks(self) -> None: # 1.56 µs ± 31.6 ns
+        self.bids = numba_sort_desc(self.bids[: self.depth])  # Sort descending
+        self.bba[0, :] = self.bids[0]  # Update best bid
+    
+    
+    def sort_asks(self) -> None: #786 ns ± 30.9 ns
         """
         Sorts the ask orders in ascending order of price and updates the best ask.
         """
-        self.asks = self.asks[self.asks[:, 0].argsort()][: self.depth]
-        self.bba[1, :] = self.asks[0]
+        self.asks = numba_sort_asc(self.asks[: self.depth])  # Sort ascending
+        self.bba[1, :] = self.asks[0]  # Update best ask
 
-    def refresh(self, bids: NDArray, asks: NDArray, timestamp) -> None:
+    def refresh(self, bids: NDArray, asks: NDArray, timestamp, new_seq_id) -> None: #1.66 μs ± 32.4 ns
         """
         Refreshes the order book with given *complete* ask and bid data and sorts the book.
 
@@ -92,10 +108,16 @@ class BaseOrderbook:
         self.asks[:max_asks_idx, :self.columns] = asks[:max_asks_idx, :self.columns]
         self.bids[:max_bids_idx, :self.columns] = bids[:max_bids_idx, :self.columns]
         self.timestamp = timestamp
+
+        if new_seq_id == 0:
+            self.seq_id += 1
+        else:
+            self.seq_id = new_seq_id
+            
         self.sort_bids()
         self.sort_asks()
 
-    def update_bids(self, bids: NDArray, timestamp) -> None:
+    def update_bids(self, bids: NDArray, timestamp, new_seq_id) -> None: #2.36 μs ± 77.5 ns
         """
         Updates the current bids with new data. Removes entries with matching
         prices in update, regardless of size, and then adds non-zero quantity
@@ -108,6 +130,11 @@ class BaseOrderbook:
         """
         if bids.size == 0:
             return None
+        
+        if new_seq_id == 0:
+            self.seq_id += 1
+        else:
+            self.seq_id = new_seq_id
 
         self.bids = self.bids[~nbisin(self.bids[:, 0], bids[:, 0])]
         self.bids = np.vstack((self.bids, bids[bids[:, 1] != 0]))
@@ -115,7 +142,7 @@ class BaseOrderbook:
         if self.timestamp < timestamp:
             self.timestamp = timestamp
 
-    def update_asks(self, asks: NDArray, timestamp) -> None:
+    def update_asks(self, asks: NDArray, timestamp, new_seq_id) -> None: #2.36 μs ± 77.5 ns
         """
         Updates the current asks with new data. Removes entries with matching
         prices in update, regardless of size, and then adds non-zero quantity
@@ -128,6 +155,11 @@ class BaseOrderbook:
         """
         if asks.size == 0:
             return None
+        
+        if new_seq_id == 0:
+            self.seq_id += 1
+        else:
+            self.seq_id = new_seq_id
 
         self.asks = self.asks[~nbisin(self.asks[:, 0], asks[:, 0])]
         self.asks = np.vstack((self.asks, asks[asks[:, 1] != 0]))
@@ -147,6 +179,7 @@ class BaseOrderbook:
         bids : Array
             New bid orders data, formatted as [[price, size], ...].
         """
+
         self.update_asks(asks)
         self.update_bids(bids)
     
@@ -231,7 +264,7 @@ class BaseOrderbook:
         return (bid_size_weighted_sum + ask_size_weighted_sum) / total_size
     
     @property
-    def spread(self) -> float: # 613 ns ± 2.75 ns
+    def spread(self) -> float: # 73.3 ns ± 2.06 ns
         """
         Calculates the current spread of the order book.
 

@@ -14,12 +14,12 @@ async def main():
         rootLogger.setFilters("MM")
         rootLogger.setHandlers()
         ss = MMSharedState(debug=debug,logger=rootLogger)
-        trading_logic = TradingLogic(ss,rootLogger.createChild(child_name="Logic", debug_mode=debug))
+        # trading_logic = TradingLogic(ss,rootLogger.createChild(child_name="Logic", debug_mode=debug))
         
         await asyncio.gather(
             ss.refresh_parameters(),
             ss.start_internal_processes(),
-            trading_logic.start_loop()
+            # trading_logic.start_loop()
         )
         
     except (KeyboardInterrupt, asyncio.CancelledError):
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
-   # nest_asyncio.apply(loop)
+    nest_asyncio.apply(loop)
     try:
         loop.run_until_complete(main())
     finally:

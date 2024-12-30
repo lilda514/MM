@@ -21,6 +21,7 @@ class TimeInForce:
     GTC = 0
     FOK = 1
     POST_ONLY = 2
+    IOC = 3
 
 
 class PositionDirection:
@@ -33,6 +34,10 @@ class OrderStatus:
     IN_THE_BOOK = 2
     TO_CANCEL = 3
     RECENTLY_CANCELLED = 4
+
+class ReduceOnly:
+    TRUE = True
+    FALSE = False    
 
 class Order:
     def __init__(
@@ -486,12 +491,13 @@ class TimeInForceConverter(StrNumConverter):
         A dictionary mapping numerical values to string representations.
     """
 
-    def __init__(self, GTC: str, FOK: str, POST_ONLY: str) -> None:
+    def __init__(self, GTC: str, FOK: str, POST_ONLY: str, IOC: str) -> None:
         super().__init__(
             str_to_int={
                 f"{GTC}": TimeInForce.GTC,
                 f"{FOK}": TimeInForce.FOK,
                 f"{POST_ONLY}": TimeInForce.POST_ONLY,
+                f"{IOC}": TimeInForce.IOC
             }
         )
 
@@ -522,5 +528,34 @@ class PositionDirectionConverter(StrNumConverter):
             str_to_int={
                 f"{LONG}": PositionDirection.LONG,
                 f"{SHORT}": PositionDirection.SHORT,
+            }
+        )
+
+class ReduceOnlyConverter(StrNumConverter):
+    """
+    A converter class for position directions, converting between string and numerical representations.
+
+    Parameters
+    ----------
+    TRUE : str
+        The string representation if an order is to be reduce only.
+
+    FALSE : str
+        The string representation if an order is NOT to be reduce only.
+
+    Attributes
+    ----------
+    str_to_num : dict
+        A dictionary mapping string representations to numerical values.
+
+    num_to_str : dict
+        A dictionary mapping numerical values to string representations.
+    """
+
+    def __init__(self, TRUE: str, FALSE: str) -> None:
+        super().__init__(
+            str_to_int={
+                f"{TRUE}": ReduceOnly.TRUE,
+                f"{FALSE}": ReduceOnly.FALSE,
             }
         )

@@ -23,7 +23,7 @@ class HlOrderTypeConverter(OrderTypeConverter):
 
 class HlTimeInForceConverter(TimeInForceConverter):
     def __init__(self):
-        super().__init__(GTC= "Gtc", FOK= "Ioc", POST_ONLY = "Alo")
+        super().__init__(GTC= "Gtc", FOK= "", POST_ONLY = "Alo", IOC = "Ioc")
 
 #Cannot be used?
 class HlPositionDirectionConverter(PositionDirectionConverter):

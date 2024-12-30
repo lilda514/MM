@@ -22,6 +22,7 @@ class TickerHandler(ABC):
         """
         self.ticker = ticker
         self.format = {
+            "timestamp": 0.0,
             "markPrice": 0.0,
             "indexPrice": 0.0,
             "fundingTime": 0.0,

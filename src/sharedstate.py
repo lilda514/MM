@@ -111,7 +111,7 @@ class SharedState(ABC):
             from src.exchanges.binance.websocket import BinanceWebsocket
             
             # NOTE: Binance requires capital symbols
-            self.exchanges["binance"]["symbol"] = symbol
+            self.exchanges["binance"]["symbol"] = symbol.upper()
             
             if self.exchanges["binance"]["type"].lower() == "trading" :
                 if (not self.config["binance"].get("api_key",False) or not self.config["binance"].get("api_secret",False)) :
@@ -130,7 +130,7 @@ class SharedState(ABC):
                 data=self.data["binance"]
                 )
 
-            self.websockets["binance"] = BinanceWebsocket(self.exchanges["binance"]["exchange"])
+            self.websockets["binance"] = BinanceWebsocket(self.exchanges["binance"]["exchange"],ws_record=True)
             self.websockets["binance"].load_required_refs(
                 logging=self.logging.createChild("binance.ws",self.debug),
                 symbol=self.exchanges["binance"]["symbol"],
@@ -142,7 +142,7 @@ class SharedState(ABC):
             from frameworks.exchange.bybit.websocket import BybitWebsocket
 
             # NOTE: Bybit requires capital symbols
-            self.exchanges["bybit"]["symbol"] = symbol
+            self.exchanges["bybit"]["symbol"] = symbol.upper()
             
             if self.exchanges["bybit"]["type"].lower() == "trading" :
                 if (not self.config["bybit"].get("api_key",False) or not self.config["bybit"].get("api_secret",False)) :
@@ -174,7 +174,7 @@ class SharedState(ABC):
                 from src.exchanges.hyperliquid.ws import HlWebsocket
                 
                 # NOTE: Hl requires capital symbols
-                self.exchanges["hyperliquid"]["symbol"] = symbol
+                self.exchanges["hyperliquid"]["symbol"] = symbol.upper()
                 
                 if self.exchanges["hyperliquid"]["type"].lower() == "trading" :
                     if (not self.config["hyperliquid"].get("secret_key",False)):
@@ -182,6 +182,7 @@ class SharedState(ABC):
                     else:
                         secret_key = self.config["hyperliquid"]["secret_key"]
                 else:
+                    #TODO: Change this logic. When using None as secret key, it throws an erros when creating a wallet during exchange __init__ 
                     secret_key = None
 
                 self.exchanges["hyperliquid"]["exchange"] = Hyperliquid(secret_key, is_mainnet=True)
@@ -191,16 +192,47 @@ class SharedState(ABC):
                     data=self.data["hyperliquid"]
                 )
 
-                self.websockets["hyperliquid"] = HlWebsocket(self.exchanges["hyperliquid"]["exchange"])
+                self.websockets["hyperliquid"] = HlWebsocket(self.exchanges["hyperliquid"]["exchange"],ws_record=True)
                 self.websockets["hyperliquid"].load_required_refs(
                     logging=self.logging.createChild("hyperliquid.ws",self.debug),
                     symbol=self.exchanges["hyperliquid"]["symbol"],
                     data=self.data["hyperliquid"]
                 )
+                
+        elif exchange.lower() == "bitget":
+            from src.exchanges.bitget.exchange import Bitget
+            from src.exchanges.bitget.websocket import BitgetWebsocket
+            
+            # NOTE: bitget requires capital symbols
+            self.exchanges["bitget"]["symbol"] = symbol.upper()
+            
+            if self.exchanges["bitget"]["type"].lower() == "trading" :
+                if (not self.config["bitget"].get("secret_key",False)) or (not self.config["bitget"].get("api_key",False)) or (not self.config["bitget"].get("passphrase",False)):
+                    raise Exception("Missing/incorrect API credentials!")
+                else:
+                    secret_key = self.config["bitget"]["secret_key"]
+                    api_key = self.config["bitget"]["api_key"]
+                    passphrase = self.config["bitget"]["passphrase"]
+            else:
+                secret_key = None
 
+            self.exchanges["bitget"]["exchange"] = Bitget(api_key, api_secret,passphrase)
+            self.exchanges["bitget"]["exchange"].load_required_refs(
+                logging=self.logging.createChild("bitget.exchange",self.debug),
+                symbol=self.exchanges["bitget"]["symbol"],
+                data=self.data["bitget"]
+                )
+
+            self.websockets["bitget"] = BitgetWebsocket(self.exchanges["bitget"]["exchange"])
+            self.websockets["bitget"].load_required_refs(
+                logging=self.logging.createChild("bitget.ws",self.debug),
+                symbol=self.exchanges["bitget"]["symbol"],
+                data=self.data["bitget"]
+                )
+            
         elif exchange.lower() == "dydx":
-            from frameworks.exchange.dydx_v4.exchange import Dydx
-            from frameworks.exchange.dydx_v4.websocket import DydxWebsocket
+            from src.exchanges.dydx_v4.exchange import Dydx
+            from src.exchanges.dydx_v4.websocket import DydxWebsocket
 
             self.exchanges["dydx"]["exchange"] = Dydx(api_key, api_secret)
             self.exchanges["dydx"]["exchange"].load_required_refs(
@@ -269,6 +301,7 @@ class SharedState(ABC):
                                 "trades": RingBuffer(1000, dtype=(np.float64, 4)),
                                 "orderbook": BaseOrderbook(30,3) if exchange_name.lower()=="hyperliquid" else BaseOrderbook(50), # NOTE: Modify OB size if required!
                                 "ticker": {
+                                    "timestamp": 0.0,
                                     "markPrice": 0.0,
                                     "indexPrice": 0.0,
                                     "fundingTime": 0.0,

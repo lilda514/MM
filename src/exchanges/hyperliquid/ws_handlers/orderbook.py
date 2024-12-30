@@ -53,7 +53,7 @@ class HlOrderBookHandler():
             asks[i, 1] = askslvldict['sz']
             asks[i, 2] = askslvldict['n']
                              
-        self.orderbook.refresh(bids,asks,time)
+        self.orderbook.refresh(bids,asks,time,0)
 
     @abstractmethod
     def process(self, recv: Dict) -> None:
@@ -91,6 +91,6 @@ class HlOrderBookHandler():
             asks[i, 1] = askslvldict['sz']
             asks[i, 2] = askslvldict['n']
                              
-        self.orderbook.refresh(bids,asks,time)
+        self.orderbook.refresh(bids,asks,time,0)
 
         

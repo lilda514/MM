@@ -1,12 +1,15 @@
 ---
 # "Binance", "Bybit", "Hyperliquid", ...
 exchanges:
-  #Binance:
-    #symbol: WLDUSDT
-    #type: data
+  Binance:
+    symbol: BTCUSDT
+    type: data
   Hyperliquid:
-    symbol: WIF
+    symbol: BTC
     type: trading
+  #bitget:
+    #symbol: SBTCUSDT
+    #type: trading
 
 # "plain", "stink" ,...
 quote_generator: sandbox

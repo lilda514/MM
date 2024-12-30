@@ -22,8 +22,8 @@ from src.exchanges.hyperliquid.exchange import Hyperliquid
 
 class HlWebsocket(WebsocketStream):
     
-    def __init__(self, exch: Hyperliquid) -> None:
-        super().__init__()
+    def __init__(self, exch: Hyperliquid,ws_record = False) -> None:
+        super().__init__(ws_record = ws_record)
         self.exch = exch
         self.is_mainnet = exch.is_mainnet
         self.endpoints = HyperliquidEndpoints
@@ -125,14 +125,26 @@ class HlWebsocket(WebsocketStream):
 
 
     async def start(self):
+        """
+        Starts all necessary asynchronous tasks for Websocket stream management and data refreshing.
+        """
         self.create_handlers()
-        await asyncio.gather(
-            self.refresh_orderbook_data(),
-            self.refresh_ohlcv_data(),
-            self.refresh_ticker_data(),
-            self.refresh_position_data(),
-            self.start_public_stream(),
-        )
+        tasks = [
+                # self.refresh_orderbook_data(),
+                # self.refresh_trades_data(),
+                # self.refresh_ohlcv_data(),
+                # self.refresh_ticker_data(),
+                self.start_public_stream()
+                ]
+    
+        if self.ws_record:
+            tasks += [   
+                self.save_to_s3(message_queue=self.message_queue,
+                                bucket_name = "dalil-market-data", 
+                                key_prefix = "hyperliquid"),
+                ]
+
+        await asyncio.gather(*tasks)
     # marketdatalogger = logging.getLogger(__name__)
     # marketdatalogger.setLevel(logging.DEBUG)
     # date = datetime.today()

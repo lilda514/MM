@@ -66,7 +66,7 @@ class Client(ABC):
         self.session = aiosonic.HTTPClient()
         self.timestamp = time.time()//1000
         
-        if not self.api_key or not self.api_secret:
+        if not self.api_key or not self.api_secret or not self.passphrase:
             self.access_type = "data"
         else: 
             self.access_type = "trading"
@@ -139,7 +139,7 @@ class Client(ABC):
                 raise Exception(f"Unknown status code - {code}")
 
     @abstractmethod
-    def sign_headers(self, method: str, header: Dict) -> Dict[str, Any]:
+    def sign(self, method: str, header: Dict) -> Dict[str, Any]:
         """
         Sign & encrypt the header inline the appropriate exchange's needs.
 
