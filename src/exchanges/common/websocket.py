@@ -10,7 +10,7 @@ import msgpack
 import zstandard as zstd
 import boto3
 from datetime import datetime
-
+import aioboto3
 
 class WebsocketStream(ABC):
     _success_ = set((aiohttp.WSMsgType.TEXT, aiohttp.WSMsgType.BINARY))
@@ -37,9 +37,10 @@ class WebsocketStream(ABC):
         if self.ws_record:    
             self.message_queue = asyncio.Queue()
             self.compressor = zstd.ZstdCompressor(level=3)
-            self.s3_client = boto3.client('s3')
-            self.BATCH_SIZE = 10000  # Number of messages per batch to save
-            self.SAVE_INTERVAL = 3600  # Save to S3 every 1 hour (in seconds) 
+            # self.s3_client = boto3.client('s3')
+            self.aioboto3_session = aioboto3.Session()
+            self.BATCH_SIZE = 5000  # Number of messages per batch to save
+            self.SAVE_INTERVAL = 3600/2  # Save to S3 every 1 hour (in seconds) 
 
     def _disable_trading_methods(self):
         """Disable trading methods if trading access is not allowed."""
@@ -460,70 +461,71 @@ class WebsocketStream(ABC):
         
         current_batch = []
         start_time = datetime.utcnow()
+        with  self.aioboto3_session.client("s3") as s3_client:
+            try:
+                while True:
+                    
+                    try:
+                        # Gather messages for batching
+                        for _ in range(self.BATCH_SIZE):
+                            current_batch.append(await asyncio.wait_for(self.message_queue.get(), timeout=1))
         
-        try:
-            while True:
-                try:
-                    # Gather messages for batching
-                    for _ in range(self.BATCH_SIZE):
-                        current_batch.append(await asyncio.wait_for(self.message_queue.get(), timeout=1))
+                    except asyncio.TimeoutError:
+                        pass  # No messages to process, proceed with saving
+        
+                    now = datetime.utcnow()
+                    elapsed_time = (now - start_time).total_seconds()
+        
+                    if len(current_batch) >= self.BATCH_SIZE or (elapsed_time >= self.SAVE_INTERVAL and current_batch): 
+                        # Serialize and compress the batch
+                        packed_data = msgpack.packb(current_batch)
+                        compressed_data = self.compressor.compress(packed_data)
     
-                except asyncio.TimeoutError:
-                    pass  # No messages to process, proceed with saving
+                        # Generate a timestamped S3 key
+                        timestamp = start_time.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+                        s3_key = f"{key_prefix}/data_{timestamp}.msgpack.zst"
     
-                now = datetime.utcnow()
-                elapsed_time = (now - start_time).total_seconds()
+                        # Upload to S3
+                        try:
+                            await s3_client.put_object(
+                                Bucket=bucket_name,
+                                Key=s3_key,
+                                Body=compressed_data,
+                            )
+                            print(f"Uploaded batch to S3: {s3_key}")
+                        except Exception as e:
+                            print(f"Failed to upload batch to S3: {e}")
     
-                if len(current_batch) >= self.BATCH_SIZE or (elapsed_time >= self.SAVE_INTERVAL and current_batch): 
-                    # Serialize and compress the batch
+                        # Clear the current batch
+                        current_batch = []
+        
+                        # Update start time for the next interval
+                        start_time = now
+            except asyncio.CancelledError:
+                # Handle graceful shutdown
+                if current_batch:
+                    print("Saving remaining messages before shutting down...")
                     packed_data = msgpack.packb(current_batch)
                     compressed_data = self.compressor.compress(packed_data)
-
+        
                     # Generate a timestamped S3 key
-                    timestamp = start_time.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+                    timestamp = datetime.utcnow().strftime("%Y-%m-%d_%Hh%Mm%Ss")
                     s3_key = f"{key_prefix}/data_{timestamp}.msgpack.zst"
-
+        
                     # Upload to S3
                     try:
-                        self.s3_client.put_object(
+                        await s3_client.put_object(
                             Bucket=bucket_name,
                             Key=s3_key,
                             Body=compressed_data,
                         )
-                        print(f"Uploaded batch to S3: {s3_key}")
+                        print(f"Uploaded remaining batch to S3: {s3_key}")
                     except Exception as e:
-                        print(f"Failed to upload batch to S3: {e}")
-
-                    # Clear the current batch
-                    current_batch = []
-    
-                    # Update start time for the next interval
-                    start_time = now
-        except asyncio.CancelledError:
-            # Handle graceful shutdown
-            if current_batch:
-                print("Saving remaining messages before shutting down...")
-                packed_data = msgpack.packb(current_batch)
-                compressed_data = self.compressor.compress(packed_data)
-    
-                # Generate a timestamped S3 key
-                timestamp = datetime.utcnow().strftime("%Y-%m-%d_%Hh%Mm%Ss")
-                s3_key = f"{key_prefix}/data_{timestamp}.msgpack.zst"
-    
-                # Upload to S3
-                try:
-                    self.s3_client.put_object(
-                        Bucket=bucket_name,
-                        Key=s3_key,
-                        Body=compressed_data,
-                    )
-                    print(f"Uploaded remaining batch to S3: {s3_key}")
-                except Exception as e:
-                    print(f"Failed to upload remaining batch to S3: {e}")
-            print("Gracefully shutting down...")
-        finally:
-            # Close the S3 client
-            self.s3_client.close()
+                        print(f"Failed to upload remaining batch to S3: {e}")
+                print("Gracefully shutting down...")
+            finally:
+                # Close the S3 client
+                self.s3_client.close()
 
 
     @abstractmethod

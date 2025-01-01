@@ -41,15 +41,15 @@ class BinanceWebsocket(WebsocketStream):
                 "ACCOUNT_UPDATE": BinancePositionHandler(self.data, self.symbol),
             }
 
-    async def refresh_orderbook_data(self, timer: int = 600) -> None:
+    async def refresh_orderbook_data(self, symbol: str, timer: int = 600, ) -> None:
         while True:
-            orderbook_data = await self.exch.get_orderbook(self.symbol)
+            orderbook_data = await self.exch.get_orderbook(symbol)
             self.public_handler_map["depthUpdate"].refresh(orderbook_data)
             await asyncio.sleep(timer)
 
-    async def refresh_trades_data(self, timer: int = 600) -> None:
+    async def refresh_trades_data(self,symbol: str, timer: int = 600) -> None:
         while True:
-            trades_data = await self.exch.get_trades(self.symbol)
+            trades_data = await self.exch.get_trades(symbol)
             self.public_handler_map["trade"].refresh(trades_data)
             await asyncio.sleep(timer)
 
@@ -69,7 +69,7 @@ class BinanceWebsocket(WebsocketStream):
         request = [
             {
                 "method": "SUBSCRIBE",
-                "params": [
+                "params": [ 
                     f"{self.symbol.lower()}@trade",
                     # f"{self.symbol.lower()}@depth@100ms",
                     f"{self.symbol.lower()}@markPrice@1s",
