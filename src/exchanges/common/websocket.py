@@ -461,7 +461,7 @@ class WebsocketStream(ABC):
         
         current_batch = []
         start_time = datetime.utcnow()
-        with  self.aioboto3_session.client("s3") as s3_client:
+        async with self.aioboto3_session.client("s3") as s3_client:
             try:
                 while True:
                     
@@ -525,7 +525,7 @@ class WebsocketStream(ABC):
                 print("Gracefully shutting down...")
             finally:
                 # Close the S3 client
-                self.s3_client.close()
+                await s3_client.close()
 
 
     @abstractmethod
