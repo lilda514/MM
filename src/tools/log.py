@@ -3,47 +3,6 @@ import picologging as logging
 import datetime
 import os
 import time
-
-
-# class LoggerInstance(logging.Logger):
-#     """
-#     Logger instance finetuned to our needs
-#     """
-    
-#     def __init__(self, name: str, debug_mode:bool = False, basepath = None):
-#         level = logging.DEBUG if debug_mode else 0
-#         logging.Logger(name,level)
-#         # super().__init__(self,name,level)
-#         self.propagate = False # Prevent propagation to the root logger
-#         #Will set path to put logs
-#         if basepath is None:
-#             date = datetime.datetime.today()
-#             datestring = date.strftime("%Y-%m-%d %Hh%M")
-#             cwd = os.getcwd()
-#             self.basepath = os.path.join(cwd, f'logs\\{datestring}')
-#             os.makedirs(self.basepath, exist_ok = True) #making sure there is a file to write to
-
-#         else:
-#             self.basepath = basepath
-        
-#     def createChild(self,child_name:str,debug_mode:bool = False):
-#         return LoggerInstance(f"{self.name}.{child_name}",debug_mode,self.basepath)
-    
-#     def setTopicFilter(self,topic):
-#         self.addFilter(TopicFilter(topic))
-    
-#     def defaultFormatter(self):
-#         return logging.Formatter('{asctime} | {levelname} | {topic} | {msg}',style="{" )
-    
-#     def setHandlers(self):
-#         # indiviualfp = os.path.join(self.basepath,*self.name.split("."), ".log") # an individual logfile for each children 
-#         # individualFileHandler = logging.FileHandler(indiviualfp, mode = "a")
-#         commonfp = os.path.join(self.basepath, self.name.split(".")[0]+".log") # 1 common logfile with the same name as the parent 
-        
-#         commonFileHandler = logging.FileHandler(commonfp, mode = "a")        
-#         commonFileHandler.setLevel(self.level)
-#         commonFileHandler.setFormatter(self.defaultFormatter())
-#         self.addHandler(commonFileHandler)
         
 class LoggerInstance:
     """
@@ -156,20 +115,6 @@ class AsctimeFilter(logging.Filter):
         record.timestamp = time.strftime("%H:%M:%S.", time.gmtime(record.created)) + f"{milliseconds:03d}"
         return True
     
-    
-# log1 = LoggerInstance("test",True)
-# log1.logger.addFilter(AsctimeFilter())
-# log1.setTopicFilter("exch")
-# log1.setHandlers()
-
-# # log2 = logging.Logger("test2",10)
-# # log2.addFilter(TopicFilter("exch"))
-
-# # log2.debug("hello")
-
-# log1.debug("hello")
-# log1.close()
-
 
 
     

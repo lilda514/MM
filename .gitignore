@@ -4,3 +4,7 @@ config.json
 s3_downloader.py
 untitled1.py
 src/exchanges/hyperliquid/oldlog/
+src/exchanges/hyperliquid/logs/
+market_data/
+research/
+.virtual_documents/
